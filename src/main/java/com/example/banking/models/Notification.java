@@ -1,45 +1,63 @@
 package com.example.banking.models;
 
+import com.example.banking.services.NotifierService;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Notification implements Comparable<Notification> {
     private String email;
     private long balance;
     private Date timestamp;
     private String errorMessage;
+    private String type;
 
     private Notification(String email) {
         this.email = email;
+        this.type = "GENERAL";
     }
 
-    public static class Builder {
+    public static class NotificationBuilder {
 
         private final Notification notification;
 
-        public Builder(String email) {
+        private NotificationBuilder() {
+            this.notification = new Notification();
+        }
+
+        public NotificationBuilder(String email) {
             this.notification = new Notification(email);
         }
 
-        public Builder error(String errorMessage) {
+        public NotificationBuilder error(String errorMessage) {
             this.notification.errorMessage = errorMessage;
             return this;
         }
 
-        public Builder timestamp(Date timestamp) {
+        public NotificationBuilder timestamp(Date timestamp) {
             this.notification.timestamp = timestamp;
             return this;
         }
 
-        public Builder balance(long balance) {
+        public NotificationBuilder balance(long balance) {
             this.notification.balance = balance;
             return this;
         }
 
-        public Builder email(String email) {
+        public NotificationBuilder email(String email) {
             this.notification.email = email;
+            return this;
+        }
+
+        public NotificationBuilder type(String type) {
+            this.notification.type = type;
             return this;
         }
 
@@ -59,6 +77,6 @@ public class Notification implements Comparable<Notification> {
 
     @Override
     public String toString() {
-        return String.format("[%s has ₹%d : %s]",email,balance,timestamp);
+        return String.format("[%s has ₹%d : %s] %s",email,balance,timestamp,type);
     }
 }

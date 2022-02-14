@@ -17,41 +17,13 @@ import java.util.stream.LongStream;
 @SpringBootTest
 class BankingApplicationTests {
 
-	@Autowired
-	UserRepository repository;
 
-	Random random = new Random();
-
-	ExecutorService executorService = Executors.newCachedThreadPool();
 
 	@Test
-	void contextLoads() throws ExecutionException, InterruptedException {
+	void contextLoads() {
 
-		List<User> users = repository.getAllUsers();
-
-		List<Transaction> transactions = new ArrayList<>();
-
-//		LongStream.range(1,100)
-//		random.longs(2000,-1000,1000)
-//				.forEach(transactions::add);
-
-		String email = "name1@gmail.com";
-		Future<User> userFuture = executorService.submit(() -> repository.getUser(email));
-		User user = userFuture.get();
-
-		long sum = user.getBalance();
-		for(var i : transactions) sum += i.getValue();
-
-		performTransactions(transactions);
-
-		System.out.println(sum);
+		User user = User.builder().name("Ram").build();
+		System.out.println(user);
 	}
-
-	public void performTransactions(List<Transaction> transactions) {
-        transactions.forEach(transaction -> {
-//			repository.updateBalance(email,value);
-            executorService.submit(() -> repository.updateBalance(transaction));
-        });
-    }
 
 }

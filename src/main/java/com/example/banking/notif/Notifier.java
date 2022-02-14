@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,10 +16,12 @@ public class Notifier<T extends Notification> implements Runnable {
 
     private final ConcurrentHashMap<String,T> notifications;
     private final ScheduledExecutorService executorService;
+    private final AtomicInteger skipCount;
 
     public Notifier() {
         notifications = new ConcurrentHashMap<>();
         executorService = Executors.newScheduledThreadPool(Utils.POOL_SIZE);
+        skipCount = new AtomicInteger(0);
     }
 
     public void add(T notification) {
@@ -29,10 +32,11 @@ public class Notifier<T extends Notification> implements Runnable {
         notifications.clear();
     }
 
-    public List<T> getAllNotifications() {
+    public List<T> pollAllNotifications() {
         List<T> notificationList;
         synchronized (this) {
             notificationList = new ArrayList<>(notifications.values());
+            this.skipCount.set(0);
             this.flush();
         }
         Collections.sort(notificationList);
@@ -42,19 +46,20 @@ public class Notifier<T extends Notification> implements Runnable {
 
     public void printNotifications() {
         if(this.notEnoughNotifications()) {
+            skipCount.incrementAndGet();
             return;
         }
 
-        List<T> list = getAllNotifications();
+        List<T> notificationList = pollAllNotifications();
         System.out.println(
-                list.stream()
+                notificationList.stream()
                         .map(Notification::toString)
                         .collect(Collectors.joining("\n", "--------- NOTIFICATIONS ---------\n", "\n---------------------------------"))
         );
     }
 
     private boolean notEnoughNotifications() {
-        return this.notifications.size() < 10;
+        return this.notifications.size() < 10 && skipCount.intValue() < 5;
     }
 
     @Override

@@ -17,7 +17,7 @@ public class ScheduledService {
     }
 
     public void schedule(Runnable command, int delay, TimeUnit unit) {
-        scheduler.scheduleWithFixedDelay(command,0,delay,unit);
+        scheduler.scheduleAtFixedRate(command,0,delay,unit);
     }
 
     public void scheduleRandomly(Runnable command,int maximumDelay) {
